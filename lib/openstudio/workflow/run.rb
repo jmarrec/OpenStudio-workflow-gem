@@ -157,6 +157,10 @@ module OpenStudio
             @adapter.communicate_results @directory, @job_results[:run_runmanager]
           elsif @job_results[:run_reporting_measures]
             @logger.info 'Sending the reporting measuers results back to the adapter'
+            @time_logger.save(File.join(@directory,'profile.json'))
+
+            # The next command zips up the results, so make sure that anything that needs to be saved
+            # in the ZIP file has been written to disk
             @adapter.communicate_results @directory, @job_results[:run_reporting_measures]
           end
         ensure
