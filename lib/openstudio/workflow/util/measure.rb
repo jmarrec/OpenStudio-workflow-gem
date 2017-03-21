@@ -23,6 +23,7 @@ module OpenStudio
 
           logger = registry[:logger]
           workflow_json = registry[:workflow_json]
+          runner = registry[:runner]
           
           workflow_steps = workflow_json.workflowSteps
           fail "The 'steps' array of the OSW is required." unless workflow_steps
@@ -59,7 +60,21 @@ module OpenStudio
                 
                 # fast forward current step index to this index, skips any previous steps
                 while workflow_json.currentStepIndex < step_index
-                  workflow_json.incrementStep
+                  
+                  # just increment
+                  logger.debug "Advancing past measure '#{measure_dir_name}'"
+                  
+                  # DLM: this way does not create step results for unrun steps, they stay null
+                  #workflow_json.incrementStep
+                  
+                  # DLM: this way will create a step result for unrun steps, the result will be skip
+                  # note that if post process measures are not run those results will remain null
+                  dummy = OpenStudio::Ruleset::UserScript.new
+                  runner.prepareForUserScriptRun(dummy)
+                  current_result = runner.result
+                  runner.incrementStep
+                  current_result.setStepResult('Skip'.to_StepResult)
+
                 end
                 
                 # DLM: why is output_adapter in options instead of registry?
@@ -430,6 +445,8 @@ module OpenStudio
                   end
                   logger.debug "Finished measure.energyPlusOutputRequests for '#{measure_dir_name}', #{num_added} output requests added"
                 else
+                  # DLM: prepareForUserScriptRun is called in the measure base classes's run method
+                  
                   logger.debug "Calling measure.run for '#{measure_dir_name}'"
                   if measure_type == 'ModelMeasure'.to_MeasureType
                     measure_object.run(@model, runner, argument_map)

@@ -175,9 +175,12 @@ describe 'OSW Integration' do
     expect(osw_out).to be_instance_of Hash
     expect(osw_out[:completed_status]).to eq 'Success'
     expect(osw_out[:steps]).to be_instance_of Array
-    expect(osw_out[:steps][0][:result]).to be_nil
-    expect(osw_out[:steps][1][:result]).to be_nil
-    expect(osw_out[:steps][2][:result]).to be_nil
+    expect(osw_out[:steps][0][:result]).to_not be_nil
+    expect(osw_out[:steps][0][:result][:step_result]).to eq "Skip"
+    expect(osw_out[:steps][1][:result]).to_not be_nil
+    expect(osw_out[:steps][1][:result][:step_result]).to eq "Skip"
+    expect(osw_out[:steps][2][:result]).to_not be_nil
+    expect(osw_out[:steps][2][:result][:step_result]).to eq "Skip"
     expect(osw_out[:steps][3][:result]).to_not be_nil
     expect(osw_out[:steps][3][:result][:step_initial_condition]).to eq "DencityReports"
     expect(osw_out[:steps][3][:result][:step_result]).to eq "Success"
